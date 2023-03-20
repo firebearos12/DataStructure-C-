@@ -1,0 +1,144 @@
+#include <iostream>
+using namespace std;
+class BST;
+class BSTNode {
+  friend class BST;
+
+private:
+  int data;
+  BSTNode *left;
+  BSTNode *right;
+  BSTNode(int e) {
+    data = e;
+    left = NULL;
+    right = NULL;
+  }
+};
+class BST {
+private:
+  BSTNode *root;
+  void inorderT(BSTNode *node);
+
+public:
+  void insertN(int e);
+  void deleteN(int e);
+  void inorderT();
+};
+void BST::insertN(int e) {
+  if (!root) {
+    root = new BSTNode(e);
+    return;
+  } else {
+    BSTNode *searchN = root;
+    BSTNode *parentN = 0;
+    while (searchN) {
+      parentN = searchN;
+      if (searchN->data < e)
+        searchN = searchN->right;
+      else if (e < searchN->data)
+        searchN = searchN->left;
+      else {
+        cout << "same value detected\n";
+        break;
+      }
+    }
+
+    if (parentN->data < e)
+      parentN->right = new BSTNode(e);
+    else if (e < parentN->data)
+      parentN->left = new BSTNode(e);
+  }
+}
+
+void BST::deleteN(int e) {
+  if (!root) {
+    cout << "nothing to delete (case 1)\n";
+  } else {
+    BSTNode *searchN = root;
+    BSTNode *parentN = 0;
+    while (searchN) {
+      if (searchN->data < e) {
+        parentN = searchN;
+        searchN = searchN->right;
+      } else if (searchN->data > e) {
+        parentN = searchN;
+        searchN = searchN->left;
+      } else
+        break;
+    }
+    if (!searchN)
+      cout << "nothing to delete\n";
+    else if (!searchN->left && !searchN->right) {
+      if (root == searchN)
+        root = 0;
+      else {
+        if (searchN == parentN->left) {
+          parentN->left = 0;
+        } else {
+          parentN->right = 0;
+        }
+        delete searchN;
+      }
+    }
+    //자식이 없거나, 자식이 한개
+    else if (!searchN->left) {
+      if (root == searchN) {
+        BSTNode *newRoot;
+        newRoot = searchN->right;
+        delete root;
+        root = newRoot;
+      } else {
+        parentN->left = searchN->right;
+        delete searchN;
+      }
+    } else if (!searchN->right) {
+      if (root == searchN) {
+        BSTNode *newRoot;
+        newRoot = searchN->left;
+        delete root;
+        root = newRoot;
+      } else {
+        parentN->right = searchN->left;
+        delete searchN;
+      }
+    } else { //자식이 2개
+      BSTNode *minR = searchN->left;
+      BSTNode *minRparent = searchN;
+      while (minR->right) {
+        minRparent = minR;
+        minR = minR->right;
+      }
+      searchN->data = minR->data;
+      if (minRparent == searchN)
+        minRparent->left = minR->left;
+      else
+        minRparent->right = minR->left;
+      delete minR;
+    }
+  }
+}
+void BST::inorderT(BSTNode *searchNode) {
+  if (!searchNode)
+    return;
+  inorderT(searchNode->left);
+  cout << searchNode->data << "\n";
+  inorderT(searchNode->right);
+}
+
+void BST::inorderT() { inorderT(root); }
+
+int main() {
+  BST *bstP = new BST();
+  int testInsert[] = {20, 10, 5, 1, 7, 6, 8, 9, 25, 30, 22};
+  int testDelete[] = {5, 1, 7, 6, 25, 30, 20, 22, 10, 8, 9};
+  for (int i = 0; i < 11; i++) {
+    bstP->insertN(testInsert[i]);
+  }
+  bstP->inorderT();
+  cout << "----------\n";
+  for (int i = 0; i < 11; i++) {
+    bstP->deleteN(testDelete[i]);
+    bstP->inorderT();
+    cout << "----------\n";
+  }
+}
